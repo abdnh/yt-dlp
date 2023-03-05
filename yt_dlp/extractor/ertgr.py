@@ -97,6 +97,15 @@ class ERTFlixCodenameIE(ERTFlixBaseIE):
                 formats.extend(formats_)
                 self._merge_subtitles(subs_, target=subs)
 
+        # This modifies the m3u8 sub link to a direct https one with the .webvtt extension
+        # to fix an issue with mpv choking with the subs and the download being too slow
+        # (probably because it's downloaded in several tiny chunks)
+        for sublist in subs.values():
+            for sub in sublist:
+                if sub['ext'] == 'vtt':
+                    sub['protocol'] = 'https'
+                    sub['url'] = sub['url'].rsplit('.', maxsplit=1)[0] + '.webvtt'
+
         return formats, subs
 
     def _real_extract(self, url):
